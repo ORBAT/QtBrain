@@ -8,6 +8,7 @@ QT       -= gui
 
 TARGET = bfinterp
 TEMPLATE = lib
+VERSION = 0.01
 
 DEFINES += BFINTERP_LIBRARY
 

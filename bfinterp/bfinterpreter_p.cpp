@@ -1,5 +1,16 @@
+#include <QDebug>
 #include "bfinterpreter_p.h"
 
-BfInterpreterPrivate::BfInterpreterPrivate()
-{
+
+namespace QtBrain {
+
+    BfInterpreterPrivate::BfInterpreterPrivate(BfInterpreter * const qq) : q_ptr(qq)
+    {
+        qDebug() << "BfInterpreterPrivate()";
+    }
+
+    BfInterpreterPrivate::~BfInterpreterPrivate() {
+
+    }
+
 }

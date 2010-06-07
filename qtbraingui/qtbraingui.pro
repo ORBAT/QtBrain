@@ -10,12 +10,14 @@ TARGET = qtbrain
 TEMPLATE = app
 
 SOURCES += main.cpp\
-        brainwindow.cpp
+        brainwindow.cpp \
+    guicontroller.cpp
 
 INCLUDEPATH += ../inc
 LIBS += -L../bin \
         -lbfinterp
 
-HEADERS  += brainwindow.h
+HEADERS  += brainwindow.h \
+    guicontroller.h
 
 FORMS    += brainwindow.ui

@@ -26,6 +26,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QThread>
 #include "bfinterp_global.h"
+#include "bfinterpreter_p.h"
 
 class QStateMachine;
 class QState;
@@ -56,7 +57,8 @@ namespace QtBrain {
       internal use only from outside the interpreter will probably result in strange
       side-effects.
 
-      All slots meant for external use are marked as such.
+      All slots meant for external use are marked as such. The class is, however, currently not thread-
+      safe, so only one thread should be using it at any one time.
 
       The current signal/slot situation is really confusing and obviously suboptimal.
       */
@@ -138,6 +140,47 @@ namespace QtBrain {
 
         void breakpoint(IPType, DPType);    /* emitted when a breakpoint is reached */
 
+        /////////////////////////////////////////////////////////////////////////////////////
+        //// STATE CONTROL SIGNALS.
+        ///////////////////////////
+
+        /////////// TODO: replace with events
+
+        /* use these to control the state of the VM. Naturally not all signals are
+           meaningful in all states */
+        void resetSig();                    /* emitted to cause the VM to reset */
+        void stepSig();                     /* emitted to cause the VM to step */
+        void toggleRunSig();                /* emitted to toggle the run state on or off */
+        void clearSig();                    /* emitted to clear the VM state and start over*/
+
+    public slots:
+        /////////////////////////////////////////////////////////////////////////////////////
+        //// SLOTS FOR EXTERNAL USE
+        ///////////////////////////
+        void changeDelay(int);           /* changes the delay between steps when running */
+
+
+        void initialize(const QList<BfOpcode>&);
+
+        void input(const QString &in);  /* sets the input buffer contents.
+                                           Currently RESETS the input buffer contents
+                                           instead of appending. FIXME... */
+
+        void setBreakpoint(IPType pos); /* sets a breakpoint at the specified IP. The
+                                           breakpoint will be triggered when the IP ==
+                                           pos, but before the command at that IP is
+                                           executed */
+
+        //////////////////////////////////////////////////////////////////////////////////
+        //// PROTECTED METHODS
+        //////////////////////
+    protected:
+        void run();                     // QThread
+
+        explicit BfInterpreter(BfInterpreterPrivate &dd, QObject* parent);
+
+        BfInterpreterPrivate * const d_ptr;
+        Q_DECLARE_PRIVATE(BfInterpreter);
     };
 
 }
