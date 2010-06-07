@@ -1,0 +1,12 @@
+#ifndef BFINTERP_GLOBAL_H
+#define BFINTERP_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(BFINTERP_LIBRARY)
+#  define BFINTERPSHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define BFINTERPSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // BFINTERP_GLOBAL_H
