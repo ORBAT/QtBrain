@@ -21,3 +21,5 @@ HEADERS  += brainwindow.h \
     guicontroller.h
 
 FORMS    += brainwindow.ui
+
+include(../qtbrain.pri)

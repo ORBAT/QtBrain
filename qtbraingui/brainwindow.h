@@ -15,6 +15,9 @@ public:
     explicit BrainWindow(QWidget *parent = 0);
     ~BrainWindow();
 
+signals:
+    void testSig(const int&);
+
 protected:
     void changeEvent(QEvent *e);
 

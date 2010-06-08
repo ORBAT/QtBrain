@@ -26,7 +26,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QThread>
 #include "bfinterp_global.h"
-#include "bfinterpreter_p.h"
 
 class QStateMachine;
 class QState;
@@ -58,27 +57,13 @@ namespace QtBrain {
       side-effects.
 
       All slots meant for external use are marked as such. The class is, however, currently not thread-
-      safe, so only one thread should be using it at any one time.
+      safe, so only one thread should be using it at any one time. Read/write locking might get
+      implemented in the future
 
       The current signal/slot situation is really confusing and obviously suboptimal.
       */
 
-    typedef quint16 DPType; /* If you change this, remember to check if m_maxAddress
-                               needs changing too */
-    typedef qint8  Memtype;
-    typedef quint32 IPType;
-
-    /* these are the op codes of the BfI bytecode and their equivalence to "normal" Bf
-       INVALID is used internally in the compiler, for example. */
-    enum BfOpcode {DPINC, DPDEC, ADD, SUB, OUT, INP, JZ, JNZ, BRK, INVALID};
-    //               >      <    +    -    .    ,    [   ]     %
-
-    /* names for the opcodes. The (char*) cast is used to get rid of the annoying
-       "warning: deprecated conversion from string constant to ‘char*’ " compiler warning */
-    static char* const OPCODENAMES[] = {(char*)"DPINC", (char*)"DPDEC", (char*)"ADD",
-                                        (char*)"SUB",(char*)"OUT",(char*)"INP",(char*)"JZ",
-                                        (char*)"JNZ", (char*)"BRK", (char*)"INVALID"};
-
+    class BfInterpreterPrivate;
     class BFINTERPSHARED_EXPORT BfInterpreter : public QThread {
         Q_OBJECT
         /////////////////////////////////////////////////////////////////////////////////////
@@ -157,7 +142,7 @@ namespace QtBrain {
         /////////////////////////////////////////////////////////////////////////////////////
         //// SLOTS FOR EXTERNAL USE
         ///////////////////////////
-        void changeDelay(int);           /* changes the delay between steps when running */
+        void changeDelay(const int&);           /* changes the delay between steps when running */
 
 
         void initialize(const QList<BfOpcode>&);
@@ -166,7 +151,7 @@ namespace QtBrain {
                                            Currently RESETS the input buffer contents
                                            instead of appending. FIXME... */
 
-        void setBreakpoint(IPType pos); /* sets a breakpoint at the specified IP. The
+        void setBreakpoint(const IPType &pos); /* sets a breakpoint at the specified IP. The
                                            breakpoint will be triggered when the IP ==
                                            pos, but before the command at that IP is
                                            executed */
@@ -175,7 +160,7 @@ namespace QtBrain {
         //// PROTECTED METHODS
         //////////////////////
     protected:
-        void run();                     // QThread
+        void run();                         // QThread
 
         explicit BfInterpreter(BfInterpreterPrivate &dd, QObject* parent);
 

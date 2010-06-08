@@ -15,10 +15,13 @@ DEFINES += BFINTERP_LIBRARY
 SOURCES += bfinterpreter.cpp \
            bfinterpreter_p.cpp
 
-PUBLIC_HEADERS += bfinterpreter.h
+PUBLIC_HEADERS += bfinterpreter.h \
+                  bfinterp_global.h \
+                  bihash.h
 
 HEADERS += $$PUBLIC_HEADERS \
-           bfinterp_global.h \
-           bfinterpreter_p.h
+           bfinterpreter_p.h \
+    customtransitions.h
+
 
 include(../qtbrain.pri)
