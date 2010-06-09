@@ -159,6 +159,8 @@ namespace QtBrain {
         Memtype getInput();               /* dequeues one character from the input buffer.
                                              Also emits a inputConsumed() signal */
 
+        void setDebugging(const bool &set);
+
 
         /////////////////////////////////////////////////////////////////////////////////////
         //// "PUBLIC" METHODS

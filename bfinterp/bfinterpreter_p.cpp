@@ -47,6 +47,7 @@ namespace QtBrain {
 
         initializeStateMachine();
         m_stateMachine->start();
+
         /////////////////////////////////////////////////////////////////////////////////////
         //// TIMER SETUP
         ////////////////
@@ -164,7 +165,6 @@ namespace QtBrain {
         /////////////////////////////////////////////////////////////////////////////////////
         //// BREAKPOINT STATE
         /////////////////////
-        connect(m_breakpointSt, SIGNAL(entered()), this, SLOT(breakPtTest()));
         m_breakpointSt->addTransition(q, SIGNAL(stepSig()), m_steppingSt);
         m_breakpointSt->addTransition(q, SIGNAL(toggleRunSig()), m_runningSt);
 
@@ -420,6 +420,12 @@ namespace QtBrain {
         Q_ASSERT_X(!m_inputBuffer->isEmpty(), "BfInterpreterPrivate::getInput()", "input buffer empty");
         emit q->inputConsumed();
         return m_inputBuffer->dequeue();
+    }
+
+    void BfInterpreterPrivate::setDebugging(const bool &set) {
+        m_debugging = set;
+        Q_Q(BfInterpreter);
+        emit q->debugging(set);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////

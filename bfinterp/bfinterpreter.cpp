@@ -15,13 +15,15 @@ namespace QtBrain {
      BfInterpreterPrivate's constructor. How do I solve this? Does it even *need* solving
      in this case?
      */
-    BfInterpreter::BfInterpreter(QObject *parent) : QThread(parent), dpt(new BfInterpreterPrivate(this))
+    BfInterpreter::BfInterpreter(QObject *parent) : QObject(parent), dpt(new BfInterpreterPrivate(this))
     {
         qDebug() << "BfInterpreter()";
-        qDebug() << "BfInterpreter() thread"<< currentThreadId();
+
+        qDebug() << "BfInterpreter() thread"<< thread()->currentThreadId();
+
     }
 
-    BfInterpreter::BfInterpreter(BfInterpreterPrivate &dd, QObject *parent) : QThread(parent), dpt(&dd)
+    BfInterpreter::BfInterpreter(BfInterpreterPrivate &dd, QObject *parent) : QObject(parent), dpt(&dd)
     {}
 
     BfInterpreter::~BfInterpreter() {
@@ -32,27 +34,47 @@ namespace QtBrain {
     //// SLOTS FOR EXTERNAL USE
     ///////////////////////////
     void BfInterpreter::changeDelay(const int &delay) {
+        qDebug() << "BfInterpreter() thread"<<thread()->currentThreadId();
         Q_D(BfInterpreter);
         d->changeDelay(delay);
     }
 
     void BfInterpreter::initialize(const QList<BfOpcode> &src) {
+        qDebug() << "BfInterpreter() thread"<<thread()->currentThreadId();
         Q_D(BfInterpreter);
         d->doinit(src);
     }
 
-    void BfInterpreter::input(const QString &in){
 
+
+    void BfInterpreter::initialize(QList<BfOpcode> const *src) {
+        qDebug() << "BfInterpreter() thread"<<thread()->currentThreadId();
+        QList<BfOpcode> derp = *src;
+        Q_D(BfInterpreter);
+        d->doinit(derp);
     }
 
+    void BfInterpreter::input(const QString &in){
+        qDebug() << "BfInterpreter() thread"<<thread()->currentThreadId();
+        Q_D(BfInterpreter);
+        d->input(in);
+    }
+
+    void BfInterpreter::setDebugging(const bool &set) {
+        qDebug() << "BfInterpreter() thread"<<thread()->currentThreadId();
+        if(set) {
+            Q_D(BfInterpreter);
+            d->setDebugging(set);
+        }
+    }
 
 
     //////////////////////////////////////////////////////////////////////////////////
     //// PROTECTED METHODS
     //////////////////////
 
-    void BfInterpreter::run() {
-        exec();
-    }
+//    void BfInterpreter::run() {
+//       exec();
+//    }
 
 }

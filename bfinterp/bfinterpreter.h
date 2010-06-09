@@ -64,13 +64,13 @@ namespace QtBrain {
       */
 
     class BfInterpreterPrivate;
-    class BFINTERPSHARED_EXPORT BfInterpreter : public QThread {
+    class BFINTERPSHARED_EXPORT BfInterpreter : public QObject {
         Q_OBJECT
         /////////////////////////////////////////////////////////////////////////////////////
         //// PUBLIC METHODS
         ///////////////////
     public:
-        explicit BfInterpreter(QObject *parent);
+        explicit BfInterpreter(QObject *parent = 0);
         virtual ~BfInterpreter();
 
         /////////////////////////////////////////////////////////////////////////////////////
@@ -125,11 +125,14 @@ namespace QtBrain {
 
         void breakpoint(IPType, DPType);    /* emitted when a breakpoint is reached */
 
+        void debugging(bool);               /* emitted when debugging mode is toggled.
+                                               true for debugging mode, false otherwise*/
+
         /////////////////////////////////////////////////////////////////////////////////////
         //// STATE CONTROL SIGNALS.
         ///////////////////////////
 
-        /////////// TODO: replace with events
+        /////////// TODO: replace with events & slots
 
         /* use these to control the state of the VM. Naturally not all signals are
            meaningful in all states */
@@ -147,6 +150,8 @@ namespace QtBrain {
 
         void initialize(const QList<BfOpcode>&);
 
+//        void initialize(QList<BfOpcode> const *);
+
         void input(const QString &in);  /* sets the input buffer contents.
                                            Currently RESETS the input buffer contents
                                            instead of appending. FIXME... */
@@ -157,9 +162,9 @@ namespace QtBrain {
         //// PROTECTED METHODS
         //////////////////////
     protected:
-        void run();                         // QThread
+//        void run();                         // QThread
 
-        explicit BfInterpreter(BfInterpreterPrivate &dd, QObject* parent);
+        explicit BfInterpreter(BfInterpreterPrivate &dd, QObject* parent = 0);
         BfInterpreterPrivate * const dpt;
         Q_DECLARE_PRIVATE_D(dpt, BfInterpreter);
     };
