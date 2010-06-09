@@ -15,13 +15,13 @@ namespace QtBrain {
      BfInterpreterPrivate's constructor. How do I solve this? Does it even *need* solving
      in this case?
      */
-    BfInterpreter::BfInterpreter(QObject *parent) : QThread(parent), d_ptr(new BfInterpreterPrivate(this))
+    BfInterpreter::BfInterpreter(QObject *parent) : QThread(parent), dpt(new BfInterpreterPrivate(this))
     {
         qDebug() << "BfInterpreter()";
         qDebug() << "BfInterpreter() thread"<< currentThreadId();
     }
 
-    BfInterpreter::BfInterpreter(BfInterpreterPrivate &dd, QObject *parent) : QThread(parent), d_ptr(&dd)
+    BfInterpreter::BfInterpreter(BfInterpreterPrivate &dd, QObject *parent) : QThread(parent), dpt(&dd)
     {}
 
     BfInterpreter::~BfInterpreter() {
@@ -45,9 +45,7 @@ namespace QtBrain {
 
     }
 
-    void BfInterpreter::setBreakpoint(const IPType &pos) {
 
-    }
 
     //////////////////////////////////////////////////////////////////////////////////
     //// PROTECTED METHODS

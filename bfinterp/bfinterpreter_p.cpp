@@ -114,9 +114,9 @@ namespace QtBrain {
         // run step() whenever this state is entered
         connect(m_steppingSt, SIGNAL(entered()), this, SLOT(step()));
         // just loops back to itself when receiving additional stepSig()s
-        m_steppingSt->addTransition(this, SIGNAL(stepSig()), m_steppingSt);
+        m_steppingSt->addTransition(q, SIGNAL(stepSig()), m_steppingSt);
         // Transition to running if toggleRunSig() received
-        m_steppingSt->addTransition(this, SIGNAL(toggleRunSig()), m_runningSt);
+        m_steppingSt->addTransition(q, SIGNAL(toggleRunSig()), m_runningSt);
 
 
         /////////////////////////////////////////////////////////////////////////////////////
@@ -125,8 +125,8 @@ namespace QtBrain {
         /* Entering or exiting this state controls whether the run timer is running. */
         connect(m_runningSt, SIGNAL(entered()), this, SLOT(go()));
         connect(m_runningSt, SIGNAL(exited()), this, SLOT(stop()));
-        m_runningSt->addTransition(this, SIGNAL(stepSig()), m_steppingSt);
-        m_runningSt->addTransition(this, SIGNAL(toggleRunSig()), m_steppingSt);
+        m_runningSt->addTransition(q, SIGNAL(stepSig()), m_steppingSt);
+        m_runningSt->addTransition(q, SIGNAL(toggleRunSig()), m_steppingSt);
 
 
         /////////////////////////////////////////////////////////////////////////////////////
@@ -136,19 +136,19 @@ namespace QtBrain {
            finish() is emitted when this state is entered so that the GUI can disable
            actions and whatnot */
 
-        connect(m_finishedSt, SIGNAL(entered()), this, SIGNAL(finish()));
-        m_finishedSt->addTransition(this, SIGNAL(resetSig()), m_initializedSt);
+        connect(m_finishedSt, SIGNAL(entered()), q, SIGNAL(finish()));
+        m_finishedSt->addTransition(q, SIGNAL(resetSig()), m_initializedSt);
 
         /////////////////////////////////////////////////////////////////////////////////////
         //// WAITING FOR INPUT STATE
         ////////////////////////////
 
         // signal the GUI that the VM needs input
-        connect(m_waitingForInpSt, SIGNAL(entered()), this, SIGNAL(needInput()));
+        connect(m_waitingForInpSt, SIGNAL(entered()), q, SIGNAL(needInput()));
 
         /* send the same signal when exiting the state, so the GUI can toggle its
            input notification */
-        connect(m_waitingForInpSt, SIGNAL(exited()), this, SIGNAL(needInput()));
+        connect(m_waitingForInpSt, SIGNAL(exited()), q, SIGNAL(needInput()));
 
         /* To get out of the wait state we need either input or a reset/clear.
            Clears are handled by the top state group, but we need to catch the reset
@@ -158,15 +158,15 @@ namespace QtBrain {
         InpBufFilledTransition *ibft = new InpBufFilledTransition();
         ibft->setTargetState(m_runHistorySt);
         m_waitingForInpSt->addTransition(ibft);
-        m_waitingForInpSt->addTransition(this, SIGNAL(resetted()), m_initializedSt);
+        m_waitingForInpSt->addTransition(q, SIGNAL(resetted()), m_initializedSt);
 
 
         /////////////////////////////////////////////////////////////////////////////////////
         //// BREAKPOINT STATE
         /////////////////////
         connect(m_breakpointSt, SIGNAL(entered()), this, SLOT(breakPtTest()));
-        m_breakpointSt->addTransition(this, SIGNAL(stepSig()), m_steppingSt);
-        m_breakpointSt->addTransition(this, SIGNAL(toggleRunSig()), m_runningSt);
+        m_breakpointSt->addTransition(q, SIGNAL(stepSig()), m_steppingSt);
+        m_breakpointSt->addTransition(q, SIGNAL(toggleRunSig()), m_runningSt);
 
 
         /////////////////////////////////////////////////////////////////////////////////////
@@ -180,7 +180,7 @@ namespace QtBrain {
         ////////////////////
         m_stateGroup->setInitialState(m_emptySt);  // start in the empty state
         // if the clearSig() signal is sent when in any state, go to the clear state
-        m_stateGroup->addTransition(this, SIGNAL(clearSig()), m_clearSt);
+        m_stateGroup->addTransition(q, SIGNAL(clearSig()), m_clearSt);
 
 
         /////////////////////////////////////////////////////////////////////////////////////
@@ -190,7 +190,7 @@ namespace QtBrain {
                                                       stepping state*/
 
         /* If the VM is reset while running, go back to the initialized state */
-        m_runGroup->addTransition(this, SIGNAL(resetSig()), m_initializedSt);
+        m_runGroup->addTransition(q, SIGNAL(resetSig()), m_initializedSt);
 
         // Stop the VM when exiting the run group
         connect(m_runGroup, SIGNAL(exited()), this, SLOT(stop()));
@@ -432,9 +432,28 @@ namespace QtBrain {
 
 
 
-    void BfInterpreterPrivate::input(const QString &in) {}
+    void BfInterpreterPrivate::input(const QString &in) {
+        qDebug("BfInterpreterPrivate::input()");
+        // is the buffer currently empty?
+        bool wasBufEmpty = m_inputBuffer->isEmpty();
 
-    void BfInterpreterPrivate::setBreakpoint(const IPType &pos) {}
+        if(in.size() > 0) {
+            m_inputBuffer->clear();
+            const QByteArray ba = in.toAscii();
+            const char *inp = ba.data();
+            while (*inp) {  // QByteArrays are null-terminated, so this should work
+                m_inputBuffer->enqueue(*inp);
+                ++inp;
+            }
+        }
+        /* if the buffer was empty, post an event notifying that it was filled.
+           There is no need to check what state the VM is in since this event is ignored
+           by all but the pertinent states */
+        if(wasBufEmpty)
+            m_stateMachine->postEvent(new InputBufferFilledEvent());
+    }
+
+
 
 
 
@@ -474,11 +493,43 @@ namespace QtBrain {
 #endif
     }
 
-    void BfInterpreterPrivate::stop() {}
+    void BfInterpreterPrivate::stop() {
+        qDebug() << "BfInterpreterPrivate::stop()";
+        m_runTimer->stop();
+        Q_Q(BfInterpreter);
+        emit q->running(false);
+#ifndef QT_NO_DEBUG
+        listStates();
+#endif
+    }
 
-    void BfInterpreterPrivate::reset() {}
+    void BfInterpreterPrivate::reset() {
+        qDebug("BfVM::reset()");
+        m_DP = 0;
+        m_IP = 0;
+        clearMemory();
+        m_inputBuffer->clear();
+        Q_Q(BfInterpreter);
+        emit q->resetted();
+#ifndef QT_NO_DEBUG
+        listStates();
+#endif
+    }
 
-    void BfInterpreterPrivate::clear() {}
+    void BfInterpreterPrivate::clear() {
+        qDebug("BfInterpreterPrivate::clear()");
+        reset();
+        //m_program->clear();
+        if(m_program != NULL) {
+            delete[] m_program;
+            m_program = NULL;
+        }
+        Q_Q(BfInterpreter);
+        emit q->cleared();
+#ifndef QT_NO_DEBUG
+        listStates();
+#endif
+    }
 
 
 }

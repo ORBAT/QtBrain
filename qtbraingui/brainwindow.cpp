@@ -16,6 +16,10 @@ BrainWindow::~BrainWindow()
     delete ui;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+//// PROTECTED METHODS
+//////////////////////
+
 void BrainWindow::changeEvent(QEvent *e)
 {
     QMainWindow::changeEvent(e);
@@ -26,4 +30,12 @@ void BrainWindow::changeEvent(QEvent *e)
     default:
         break;
     }
+}
+
+void BrainWindow::closeEvent(QCloseEvent *e) {
+//    if(maybeSave()) {
+//        e->accept();
+//    } else {
+//        e->ignore();
+//    }
 }

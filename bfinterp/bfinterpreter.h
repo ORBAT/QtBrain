@@ -151,11 +151,6 @@ namespace QtBrain {
                                            Currently RESETS the input buffer contents
                                            instead of appending. FIXME... */
 
-        void setBreakpoint(const IPType &pos); /* sets a breakpoint at the specified IP. The
-                                           breakpoint will be triggered when the IP ==
-                                           pos, but before the command at that IP is
-                                           executed */
-
         void setDebugging(const bool &); // whether we send debugging signals to the GUI or not
 
         //////////////////////////////////////////////////////////////////////////////////
