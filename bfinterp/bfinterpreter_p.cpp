@@ -26,7 +26,7 @@ namespace QtBrain {
             m_program(NULL),
             m_runTimer(new QTimer(this)),
             m_inputBuffer(new QQueue<Memtype>()),
-            m_breakpoints(new QList<IPType>()),
+            m_debugging(true),                       // start in debugging mode
             m_stateMachine(new QStateMachine(this)), ///// STATE INITIALIZATIONS
             m_stateGroup(new QState()),
             m_runGroup(new QState(m_stateGroup)),
@@ -223,6 +223,11 @@ namespace QtBrain {
 
     BfInterpreterPrivate::~BfInterpreterPrivate() {
         qDebug() << "~BfInterpreterPrivate()";
+        delete[] m_memory;
+        delete m_jmps;
+        delete[] m_program;
+        delete m_stateGroup;
+        delete m_inputBuffer;
     }
 
 
@@ -303,6 +308,7 @@ namespace QtBrain {
         qDebug("IP=%d\t%s\tDP=%d (%d)",m_IP,OPCODENAMES[op],m_DP,m_memory[m_DP]);
         switch(op) {
         case(BRK): // breakpoint, yay
+            m_debugging = true; // go into debugging mode automatically
             emit q->breakpoint(m_IP, m_DP);
             m_stateMachine->postEvent(new BreakpointEvent);
             ++m_IP;
@@ -310,23 +316,30 @@ namespace QtBrain {
         case(DPINC):  // ++DP
             /* there's no need to check for overflows here or in SUBDP since it's desireable
                that the DP roll over when reaching either end */
-            emit q->DPChanged(++m_DP);
+            if(m_debugging)
+                emit q->DPChanged(++m_DP);
+
             ++m_IP;
             break;
 
         case(DPDEC): // --DP
-            emit q->DPChanged(--m_DP);
+            if(m_debugging)
+                emit q->DPChanged(--m_DP);
             ++m_IP;
             break;
 
         case(ADD): // ++*DP
             // Again no overflow checking since it's OK to overflow
-            emit q->memChanged(m_DP, ++m_memory[m_DP]);
+            ++m_memory[m_DP];
+            if(m_debugging)
+                emit q->memChanged(m_DP, m_memory[m_DP]);
             ++m_IP;
             break;
 
         case(SUB): // --*DP
-            emit q->memChanged(m_DP, --m_memory[m_DP]);
+            --m_memory[m_DP];
+            if(m_debugging)
+                emit q->memChanged(m_DP, m_memory[m_DP]);
             ++m_IP;
             break;
 
@@ -418,9 +431,6 @@ namespace QtBrain {
     }
 
 
-    void BfInterpreterPrivate::initialize(const QList<BfOpcode>& src) {
-
-    }
 
     void BfInterpreterPrivate::input(const QString &in) {}
 
@@ -428,9 +438,41 @@ namespace QtBrain {
 
 
 
-    void BfInterpreterPrivate::step() {}
+    /////////////////////////////////////////////////////////////////////////////////////////
+    //// SLOTS
+    //////////
+    void BfInterpreterPrivate::step() {
+        qDebug("BfInterpreterPrivate::step()");
 
-    void BfInterpreterPrivate::go() {}
+        //Q_ASSERT_X(m_IP < m_programSize, "BfVM::step()", "IP larger than program size");
+        /* If we've reached the last instruction, post an EndEvent and let the state machine
+           handle the rest */
+        if(m_IP >= m_programSize) {
+            qDebug("BfVM::step() program end reached");
+            m_stateMachine->postEvent(new EndEvent);
+            return;
+        }
+
+        if(m_debugging) {
+            Q_Q(BfInterpreter);
+            // Inform the world of the current IP
+            emit q->heartBeat(m_IP);
+        }
+
+        // NOTE: the IP is increased by the runInstruction() function
+        runInstruction(m_program[m_IP]);
+    }
+
+    void BfInterpreterPrivate::go() {
+        qDebug("BfInterpreterPrivate::go()");
+        // Look ma, no loops!
+        m_runTimer->start();
+        Q_Q(BfInterpreter);
+        emit q->running(true);
+#ifndef QT_NO_DEBUG
+        listStates();
+#endif
+    }
 
     void BfInterpreterPrivate::stop() {}
 

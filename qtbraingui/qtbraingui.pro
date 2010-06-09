@@ -11,14 +11,16 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         brainwindow.cpp \
-    guicontroller.cpp
+    guicontroller.cpp \
+    bfhighlighter.cpp
 
 INCLUDEPATH += ../inc
 LIBS += -L../bin \
         -lbfinterp
 
 HEADERS  += brainwindow.h \
-    guicontroller.h
+    guicontroller.h \
+    bfhighlighter.h
 
 FORMS    += brainwindow.ui
 

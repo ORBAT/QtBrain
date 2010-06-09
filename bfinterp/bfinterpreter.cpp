@@ -37,6 +37,8 @@ namespace QtBrain {
     }
 
     void BfInterpreter::initialize(const QList<BfOpcode> &src) {
+        Q_D(BfInterpreter);
+        d->doinit(src);
     }
 
     void BfInterpreter::input(const QString &in){

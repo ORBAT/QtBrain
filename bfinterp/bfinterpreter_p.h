@@ -94,7 +94,12 @@ namespace QtBrain {
                                                Input data can be given with the input()
                                                slot */
 
-        QList<IPType>      *m_breakpoints;  /* a list of breakpoints */
+        //QList<IPType>      *m_breakpoints;  /* a list of breakpoints */
+
+        bool               m_debugging;     /* if this is true, then the interpreter emits
+                                               debugging-related data to the GUI */
+
+
 
 
 
@@ -159,9 +164,6 @@ namespace QtBrain {
         //// "PUBLIC" METHODS
         /////////////////////
         void changeDelay(const int&);   /* changes the delay between steps when running */
-
-
-        void initialize(const QList<BfOpcode>&);
 
         void input(const QString &in);  /* sets the input buffer contents.
                                            Currently RESETS the input buffer contents

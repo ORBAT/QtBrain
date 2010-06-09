@@ -156,6 +156,8 @@ namespace QtBrain {
                                            pos, but before the command at that IP is
                                            executed */
 
+        void setDebugging(const bool &); // whether we send debugging signals to the GUI or not
+
         //////////////////////////////////////////////////////////////////////////////////
         //// PROTECTED METHODS
         //////////////////////
@@ -163,9 +165,8 @@ namespace QtBrain {
         void run();                         // QThread
 
         explicit BfInterpreter(BfInterpreterPrivate &dd, QObject* parent);
-
-        BfInterpreterPrivate * const d_ptr;
-        Q_DECLARE_PRIVATE(BfInterpreter);
+        BfInterpreterPrivate * const dpt;
+        Q_DECLARE_PRIVATE_D(dpt, BfInterpreter);
     };
 
 }

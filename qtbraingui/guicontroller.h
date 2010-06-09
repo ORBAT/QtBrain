@@ -3,11 +3,19 @@
 
 #include <QObject>
 
+namespace QtBrain {
+    class BfInterpreter;
+}
+
 class GUIController : public QObject
 {
     Q_OBJECT
 public:
     explicit GUIController(QObject *parent = 0);
+
+protected:
+
+    QtBrain::BfInterpreter *bfi;
 
 signals:
 
