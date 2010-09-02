@@ -2,19 +2,8 @@
 # Project created by QtCreator 2010-05-28T14:36:35
 # -------------------------------------------------
 
-TEMPLATE = subdirs
-CONFIG += ordered
-
-SUBDIRS = bfinterp \
-          qtbraingui
-
-
-
-
-
-
-#TARGET = QtBrain
-#TEMPLATE = app
+TARGET = QtBrain
+TEMPLATE = app
 
 ### USE THESE WHEN DEBUGGING
 #
@@ -24,21 +13,21 @@ SUBDIRS = bfinterp \
 #QMAKE_LFLAGS_DEBUG += -pg
 ############################
 
-# DEFINES += QT_NO_DEBUG QT_NO_DEBUG_OUTPUT QT_USE_FAST_CONCATENATION
+DEFINES += QT_NO_DEBUG QT_NO_DEBUG_OUTPUT QT_USE_FAST_CONCATENATION
 
 
-#  SOURCES += main.cpp \
-#    brainwindow.cpp \
-#    bfvm.cpp \
-#    bfcompiler.cpp \
-#    bfhighlighter.cpp
-#HEADERS += brainwindow.h \
-#    bfvm.h \
-#    bihash.h \
-#    customTransitions.h \
-#    bfcompiler.h \
-#    bfhighlighter.h
-#FORMS += brainwindow.ui
+  SOURCES += main.cpp \
+    brainwindow.cpp \
+    bfvm.cpp \
+    bfcompiler.cpp \
+    bfhighlighter.cpp
+HEADERS += brainwindow.h \
+    bfvm.h \
+    bihash.h \
+    customTransitions.h \
+    bfcompiler.h \
+    bfhighlighter.h
+FORMS += brainwindow.ui
 
-#OTHER_FILES += \
-#    qtbrain.pri
+OTHER_FILES += \
+    qtbrain.pri
